@@ -1,12 +1,6 @@
 #include QMK_KEYBOARD_H
+#include "layers.h"
 #include "version.h"
-
-enum ergodox_layers {
-    _LAYER_QWERTY = 0,
-    _LAYER_COLEMAK,
-    _LAYER_FUNCTIONS,
-    _LAYER_CONTROL
-};
 
 enum custom_keycodes {
     PLACEHOLDER = SAFE_RANGE,
