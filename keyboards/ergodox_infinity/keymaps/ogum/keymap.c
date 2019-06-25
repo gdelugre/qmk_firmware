@@ -2,10 +2,10 @@
 #include "version.h"
 
 enum ergodox_layers {
-    LAYER_QWERTY = 0,
-    LAYER_COLEMAK,
-    LAYER_FUNCTIONS,
-    LAYER_CONTROL
+    _LAYER_QWERTY = 0,
+    _LAYER_COLEMAK,
+    _LAYER_FUNCTIONS,
+    _LAYER_CONTROL
 };
 
 enum custom_keycodes {
@@ -36,7 +36,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      *                                 | Space|      | End  |       | PgDn |        |      |
      *                                 `--------------------'       `----------------------'
      */
-	[LAYER_QWERTY] = LAYOUT_ergodox(
+	[_LAYER_QWERTY] = LAYOUT_ergodox(
             //
             // Left half.
             //
@@ -84,7 +84,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      *                                 | Space|      | End  |       | PgDn |        |      |
      *                                 `--------------------'       `----------------------'
      */
-	[LAYER_COLEMAK] = LAYOUT_ergodox(
+	[_LAYER_COLEMAK] = LAYOUT_ergodox(
             //
             // Left half.
             //
@@ -132,7 +132,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      *                                 |      |      |      |       |      |      |      |
      *                                 `--------------------'       `--------------------'
      */
-	[LAYER_FUNCTIONS] = LAYOUT_ergodox(
+	[_LAYER_FUNCTIONS] = LAYOUT_ergodox(
             //
             // Left half.
             //
@@ -180,7 +180,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      *                                 |      |      |      |       |      |      |      |
      *                                 `--------------------'       `--------------------'
      */
-	[LAYER_CONTROL] = LAYOUT_ergodox(
+	[_LAYER_CONTROL] = LAYOUT_ergodox(
             //
             // Left half.
             //
@@ -210,13 +210,47 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  switch (keycode) {
-    case VRSN:
-      if (record->event.pressed) {
-        SEND_STRING (QMK_KEYBOARD "/" QMK_KEYMAP " @ " QMK_VERSION " (" QMK_BUILDDATE ")" );
-      }
-      return false;
-      break;
+    switch (keycode) {
+        case VRSN:
+            if (record->event.pressed) {
+                SEND_STRING (QMK_KEYBOARD "/" QMK_KEYMAP " @ " QMK_VERSION " (" QMK_BUILDDATE ")" );
+            }
+            return false;
+
+        case KC_RSFT:
+            if (record->event.pressed) {
+                ergodox_right_led_2_on();
+            } else {
+                ergodox_right_led_2_off();
+            }
+        break;
   }
+
   return true;
+}
+
+void matrix_scan_user(void) {
+
+    uint8_t layer = biton32(layer_state);
+
+    ergodox_right_led_1_off();
+    ergodox_right_led_2_off();
+    ergodox_right_led_3_off();
+
+    switch (layer) {
+        case _LAYER_COLEMAK:
+            ergodox_right_led_1_on();
+            break;
+
+        case _LAYER_FUNCTIONS:
+            ergodox_right_led_2_on();
+            break;
+
+        case _LAYER_CONTROL:
+            ergodox_right_led_3_on();
+            break;
+        default:
+            // none
+            break;
+    }
 }
