@@ -100,6 +100,7 @@ void update_user_visualizer_state(visualizer_state_t* state, visualizer_keyboard
     if (initial_update || prev_layer_text != state->layer_text) {
         start_keyframe_animation(&lcd_layer_display);
     }
+
     // You can also stop existing animations, and start your custom ones here
     // remember that you should normally have only one animation for the LCD
     // and one for the background. But you can also combine them if you want.

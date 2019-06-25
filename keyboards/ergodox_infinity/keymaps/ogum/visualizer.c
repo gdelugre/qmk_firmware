@@ -19,6 +19,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "default_animations.h"
 #include "led_backlight_keyframes.h"
 
+static keyframe_animation_t breathing_animation = {
+    .num_frames = 4,
+    .loop = true,
+    .frame_lengths = {gfxMillisecondsToTicks(8000), gfxMillisecondsToTicks(1000), gfxMillisecondsToTicks(1000), gfxMillisecondsToTicks(8000)},
+    .frame_functions = {keyframe_no_operation, led_backlight_keyframe_fade_out_all, led_backlight_keyframe_fade_in_all, keyframe_no_operation}
+};
+
+static bool is_breathing = false;
+
+void start_breathing_animation(void)
+{
+    if (!is_breathing) {
+        start_keyframe_animation(&breathing_animation);
+        is_breathing = true;
+    }
+}
+
+void stop_breathing_animation(void)
+{
+    if (is_breathing) {
+        stop_keyframe_animation(&breathing_animation);
+        is_breathing = false;
+    }
+}
+
+void toggle_breathing(void)
+{
+    if (is_breathing)
+        stop_breathing_animation();
+    else
+        start_breathing_animation();
+}
+
 #define RED 0
 #define ORANGE 21
 #define YELLOW 42

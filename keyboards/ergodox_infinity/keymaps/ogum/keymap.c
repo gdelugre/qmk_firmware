@@ -4,7 +4,10 @@
 
 enum custom_keycodes {
     PLACEHOLDER = SAFE_RANGE,
-    VRSN
+    EPRM,
+    VRSN,
+    BRTH,
+    SUSP,
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -160,11 +163,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
      * |--------+------+------+------+------+-------------|           |------+------+------+------+------+------+--------|
      * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
      * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
-     * |        |      |      |      |      |      |------|           |------|      |      |      |      |      |        |
+     * |  EPRM  |      |      |      |      |      |------|           |------|      |      |      |      |      |        |
      * |--------+------+------+------+------+------|      |           |      |------+------+------+------+------+--------|
      * |        |      |      |      |      |      |      |           |      |      |      |      |      |      |        |
      * `--------+------+------+------+------+-------------'           `-------------+------+------+------+------+--------'
-     *   | Led- |T(Led)| Led+ |      |      |                                       |      |      | Led- |T(Led)| Led+ |
+     *   | Led- |T(Led)| Led+ |      | Susp |                                       | Susp |      | Led- |T(Led)| Led+ |
      *   `----------------------------------'                                       `----------------------------------'
      *                                        ,-------------.       ,-------------.
      *                                        |      |      |       |      |      |
@@ -180,9 +183,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
             //
             RESET,          KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      VRSN,
             KC_NO,          KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
-            KC_NO,          KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
+            EPRM,           KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
             KC_NO,          KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
-            BL_DEC,         BL_TOGG,    BL_INC,     KC_NO,      KC_NO,
+            BL_DEC,         BL_TOGG,    BL_INC,     KC_NO,      SUSP,
 
                             KC_NO,      KC_TRNS,
                                         KC_NO,
@@ -195,7 +198,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
             KC_NO,          KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
             KC_NO,          KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
             KC_NO,          KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,      KC_NO,
-                            KC_NO,      KC_NO,      BL_DEC,     BL_TOGG,    BL_INC,
+                            SUSP,       KC_NO,      BL_DEC,     BL_TOGG,    BL_INC,
 
             KC_TRNS,        KC_NO,
             KC_NO,
@@ -203,21 +206,44 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 };
 
+extern void toggle_breathing(void);
+extern void start_breathing_animation(void);
+extern void visualizer_suspend(void);
+extern void visualizer_resume(void);
+
+static bool suspended = false;
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
+        case EPRM:
+            if (record->event.pressed) {
+                eeconfig_init();
+            }
+            return false;
+
         case VRSN:
             if (record->event.pressed) {
                 SEND_STRING (QMK_KEYBOARD "/" QMK_KEYMAP " @ " QMK_VERSION " (" QMK_BUILDDATE ")" );
             }
             return false;
 
-        case KC_RSFT:
+        case BRTH:
             if (record->event.pressed) {
-                ergodox_right_led_2_on();
-            } else {
-                ergodox_right_led_2_off();
+                toggle_breathing();
             }
-        break;
+            return false;
+
+        case SUSP:
+            if (record->event.pressed) {
+                if (!suspended) {
+                    suspended = true;
+                    visualizer_suspend();
+                } else {
+                    suspended = false;
+                    visualizer_resume();
+                }
+            }
+            return false;
   }
 
   return true;
